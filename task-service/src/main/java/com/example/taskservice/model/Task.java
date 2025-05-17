@@ -15,7 +15,7 @@ public class Task {
     private String description;
     private String status;
     private String userId;
-    private Date createdAt; // ✅ Add this if not already present
+    private Date createdAt;       // When the task was added to the system
+    private Date scheduledAt;     // ✅ When the task is scheduled (from Google Calendar)
     private String googleEventId;
 }
-

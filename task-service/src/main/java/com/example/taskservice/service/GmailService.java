@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -27,13 +30,11 @@ public class GmailService {
         RestTemplate restTemplate = new RestTemplate();
 
         try {
-            // Prepare headers with Bearer token
             HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(accessToken);  // Recommended way
+            headers.setBearerAuth(accessToken);
             headers.setAccept(List.of(MediaType.APPLICATION_JSON));
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
-
             String url = CALENDAR_API_URL;
 
             System.out.println("Sending request to Google Calendar API: " + url);
@@ -59,31 +60,54 @@ public class GmailService {
             for (int i = 0; i < events.size(); i++) {
                 JsonObject event = events.get(i).getAsJsonObject();
 
-                // Get Google Calendar event ID to prevent duplicates
                 String googleEventId = event.has("id") ? event.get("id").getAsString() : null;
-
                 if (googleEventId == null) {
                     System.out.println("Skipping event without ID.");
                     continue;
                 }
 
-                // Check if a task with this googleEventId already exists
                 Optional<Task> existingTask = taskRepository.findByGoogleEventId(googleEventId);
                 if (existingTask.isPresent()) {
-                    // Skip or update existing task if you want
-                    continue; // skipping duplicate
+                    continue;
                 }
 
                 String title = event.has("summary") ? event.get("summary").getAsString() : "Untitled Event";
                 String description = event.has("description") ? event.get("description").getAsString() : "No description";
 
+                JsonObject startObj = event.has("start") ? event.getAsJsonObject("start") : null;
+                String startDateTimeStr = null;
+
+                if (startObj != null) {
+                    if (startObj.has("dateTime")) {
+                        startDateTimeStr = startObj.get("dateTime").getAsString();
+                    } else if (startObj.has("date")) {
+                        startDateTimeStr = startObj.get("date").getAsString();
+                    }
+                }
+
+                Date eventStartDate = null;
+                if (startDateTimeStr != null) {
+                    try {
+                        if (startDateTimeStr.length() > 10) { // has time component
+                            ZonedDateTime zonedDateTime = ZonedDateTime.parse(startDateTimeStr);
+                            eventStartDate = Date.from(zonedDateTime.toInstant());
+                        } else { // just a date (e.g. "2025-05-17")
+                            LocalDate localDate = LocalDate.parse(startDateTimeStr);
+                            eventStartDate = Date.from(localDate.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant());
+                        }
+                    } catch (DateTimeParseException e) {
+                        System.err.println("Failed to parse date: " + startDateTimeStr);
+                    }
+                }
+
                 Task task = new Task();
-                task.setGoogleEventId(googleEventId);  // set unique Google event ID
+                task.setGoogleEventId(googleEventId);
                 task.setTitle(title);
                 task.setDescription(description);
                 task.setStatus("Pending");
                 task.setUserId(userId);
-                task.setCreatedAt(new Date());
+                task.setCreatedAt(new Date());  // now, the date when the task was saved
+                task.setScheduledAt(eventStartDate);  // scheduled time from calendar event
 
                 taskRepository.save(task);
             }

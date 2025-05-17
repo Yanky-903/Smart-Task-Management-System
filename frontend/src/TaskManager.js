@@ -60,7 +60,7 @@ function TaskManager() {
         }
 
         try {
-            await axios.get(`http://localhost:9091/api/tasks/fetch-google-calendar`,  {
+            await axios.get(`http://localhost:9091/api/tasks/fetch-google-calendar`, {
                 params: { accessToken, userId }
             });
             alert("Fetched tasks from Google Calendar!");
@@ -122,6 +122,18 @@ function TaskManager() {
                         <div key={index} className="task-card">
                             <h4>{task.title}</h4>
                             <p>{task.description}</p>
+                            {task.scheduledAt && (
+                                <p className="timestamp">
+                                    🕒 {new Date(task.scheduledAt).toLocaleString('en-IN', {
+                                    weekday: 'short',
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                })}
+                                </p>
+                            )}
                         </div>
                     ))
                 )}
