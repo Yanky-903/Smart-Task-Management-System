@@ -16,5 +16,6 @@ public class Task {
     private String status;
     private String userId;
     private Date createdAt; // ✅ Add this if not already present
+    private String googleEventId;
 }
 

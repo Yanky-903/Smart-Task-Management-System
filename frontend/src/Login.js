@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from './axiosInstance';
 import './Login.css';
-import { GoogleLogin } from '@react-oauth/google';
+import { useGoogleLogin } from '@react-oauth/google';
+import axios from 'axios';
 
 function Login() {
     const [email, setEmail] = useState('');
@@ -17,11 +18,11 @@ function Login() {
         try {
             const res = await axiosInstance.post('/users/login', { email, password });
             const token = res.data.token;
-            const user = res.data.user;  // user object from backend
+            const user = res.data.user;
 
             localStorage.setItem('authToken', token);
             localStorage.setItem('userId', user.id);
-            localStorage.setItem('accessToken', token); // Assuming same token for other uses
+            localStorage.setItem('accessToken', token);
 
             alert('Login successful!');
             navigate('/tasks');
@@ -33,25 +34,37 @@ function Login() {
         }
     };
 
-    const handleGoogleLoginSuccess = async (credentialResponse) => {
-        try {
-            const { credential } = credentialResponse;
-            const res = await axiosInstance.post('/users/google-login', { token: credential });
+    const loginWithGoogle = useGoogleLogin({
+        flow: 'implicit', // Or 'auth-code' if you want to go more secure
+        scope: 'https://www.googleapis.com/auth/calendar.readonly email profile',
+        onSuccess: async (tokenResponse) => {
+            const accessToken = tokenResponse.access_token;
 
-            const backendToken = res.data.token;
-            const user = res.data.user;
+            try {
+                // Optionally verify token with your backend or just store for use in task-service
+                const userInfoRes = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                });
 
-            localStorage.setItem('authToken', backendToken);
-            localStorage.setItem('userId', user.id);
-            localStorage.setItem('accessToken', backendToken);
+                const userInfo = userInfoRes.data;
 
-            alert('Google login successful!');
-            navigate('/tasks');
-        } catch (err) {
-            console.error('Google Login Failed:', err);
-            alert('Google login failed: ' + (err.response?.data || err.message));
+                // Store access token and user info
+                localStorage.setItem('authToken', accessToken); // If using same for auth (optional)
+                localStorage.setItem('accessToken', accessToken); // Needed for calendar access
+                localStorage.setItem('userId', userInfo.sub); // Use Google user ID as fallback user ID
+
+                alert('Google login successful!');
+                navigate('/tasks');
+            } catch (error) {
+                console.error('Google User Info Error:', error);
+                alert('Failed to fetch user info');
+            }
+        },
+        onError: (error) => {
+            console.error('Google OAuth Error:', error);
+            alert('Google OAuth failed');
         }
-    };
+    });
 
     return (
         <div className="auth-container">
@@ -78,10 +91,10 @@ function Login() {
                 </form>
 
                 <div style={{ marginTop: '20px' }}>
-                    <GoogleLogin
-                        onSuccess={handleGoogleLoginSuccess}
-                        onError={() => alert('Google login failed')}
-                    />
+                    <h4>Or Sign in with Google</h4>
+                    <button onClick={() => loginWithGoogle()} style={{ padding: '10px', marginTop: '10px' }}>
+                        Sign in with Google (Calendar Access)
+                    </button>
                 </div>
 
                 <p>
