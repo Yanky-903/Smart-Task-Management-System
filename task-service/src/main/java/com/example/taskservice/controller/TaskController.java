@@ -45,4 +45,5 @@ public class TaskController {
             return ResponseEntity.status(500).body("Failed to fetch tasks from Google Calendar");
         }
     }
+
 }
