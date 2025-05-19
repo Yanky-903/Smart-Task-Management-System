@@ -1,45 +1,129 @@
-.task-container {
-    padding: 20px;
-    max-width: 800px;
-    margin: auto;
+/* === GLOBAL STYLES === */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(-45deg, #74ebd5, #acb6e5, #f9f9f9, #74ebd5);
+    background-size: 400% 400%;
+    animation: gradientFlow 20s ease infinite;
+    color: #333;
+    min-height: 100vh;
 }
 
-.task-form, .task-list {
-    margin-bottom: 20px;
-    background-color: #f3f3f3;
-    padding: 20px;
-    border-radius: 10px;
+@keyframes gradientFlow {
+    0% {background-position: 0% 50%;}
+    50% {background-position: 100% 50%;}
+    100% {background-position: 0% 50%;}
+}
+
+/* === NAVBAR === */
+.navbar {
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+}
+
+.nav-links button {
+    margin-left: 12px;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    background-color: white;
+    color: #007bff;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.2s ease;
+}
+
+.nav-links button:hover {
+    background-color: #e0e0e0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.nav-links .active {
+    background-color: #0056b3;
+    color: white;
+}
+
+.nav-links .logout {
+    background-color: #dc3545;
+    color: white;
+}
+
+.nav-links .logout:hover {
+    background-color: #b02a37;
+}
+
+/* === CONTAINER === */
+.task-container {
+    padding: 32px;
+    max-width: 1000px;
+    margin: 60px auto;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* === FORMS & LIST === */
+.task-form,
+.task-list {
+    margin-bottom: 24px;
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(6px);
+    padding: 24px;
+    border-radius: 14px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.06);
 }
 
 .task-form input {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
+    padding: 12px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
 }
 
 .task-form button {
-    padding: 10px 20px;
-    background-color: teal;
+    padding: 10px 18px;
+    background-color: #007bff;
     color: white;
     border: none;
-    border-radius: 5px;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0, 123, 255, 0.3);
 }
 
+.task-form button:hover {
+    background-color: #0056b3;
+    box-shadow: 0 4px 10px rgba(0, 86, 179, 0.4);
+}
+
+/* === TASK CARDS === */
 .task-card {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 15px;
+    border: none;
+    border-radius: 14px;
+    padding: 20px;
     margin-bottom: 20px;
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    background-color: #ffffff;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s, box-shadow 0.3s ease;
 }
 
+.task-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* === COMMENTS SECTION === */
 .comments-section {
-    margin-top: 15px;
-    padding: 12px;
-    background-color: #f4f4f4;
-    border-radius: 8px;
-    border: 1px solid #ccc;
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #fafbfc;
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
 }
 
 .comments-list {
@@ -48,11 +132,11 @@
 
 .comment-item {
     background-color: #fff;
-    padding: 10px;
-    border-radius: 6px;
+    padding: 14px;
+    border-radius: 10px;
     border: 1px solid #ddd;
-    margin-bottom: 10px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    margin-bottom: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.06);
 }
 
 .comment-item p {
@@ -70,100 +154,82 @@
 
 .comment-item .comment-actions button {
     margin-right: 8px;
-    padding: 5px 10px;
+    padding: 6px 12px;
     font-size: 0.85rem;
-    border-radius: 4px;
+    border-radius: 6px;
     border: 1px solid #bbb;
     background-color: #f0f0f0;
     cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
 .comment-item .comment-actions button:hover {
     background-color: #e0e0e0;
 }
 
+/* === COMMENT INPUT === */
 textarea {
     width: 100%;
-    border-radius: 6px;
-    padding: 6px;
-    margin-bottom: 6px;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 8px;
     border: 1px solid #ccc;
     resize: vertical;
-    font-size: 0.95rem;
+    font-size: 1rem;
 }
 
 .add-comment {
     display: flex;
-    gap: 8px;
-    margin-top: 10px;
+    gap: 10px;
+    margin-top: 12px;
 }
 
 .add-comment input {
     flex-grow: 1;
-    padding: 8px;
-    border-radius: 6px;
+    padding: 10px;
+    border-radius: 8px;
     border: 1px solid #ccc;
 }
 
 .add-comment button {
-    padding: 8px 14px;
+    padding: 10px 16px;
     border: none;
     background-color: #007bff;
     color: white;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .add-comment button:hover {
     background-color: #0056b3;
-}
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 14px 24px;
-    background-color: #007bff;
-    color: white;
-    border-radius: 8px;
-    margin-bottom: 20px;
+    box-shadow: 0 3px 8px rgba(0, 86, 179, 0.2);
 }
 
-.nav-links button {
-    margin-left: 12px;
-    padding: 8px 12px;
-    border: none;
-    border-radius: 6px;
-    background-color: white;
-    color: #007bff;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.nav-links button:hover {
-    background-color: #e0e0e0;
-}
-
+/* === GOOGLE CALENDAR FETCH SECTION === */
 .google-fetch-section {
     padding: 20px;
     background-color: #f9f9f9;
-    border-radius: 8px;
+    border-radius: 12px;
     border: 1px solid #ddd;
-}
-/* Active view button */
-.nav-links .active {
-    background-color: #0056b3;
-    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
-/* Logout button (distinct style) */
-.nav-links .logout {
-    background-color: #dc3545;
-    color: white;
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+    .task-container {
+        padding: 16px;
+        margin: 20px;
+    }
+
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .nav-links button {
+        margin-left: 0;
+        margin-top: 8px;
+    }
 }
-
-.nav-links .logout:hover {
-    background-color: #b02a37;
-}
-
-

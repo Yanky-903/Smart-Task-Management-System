@@ -212,10 +212,10 @@ function TaskManager() {
                                 <h4>{task.title}</h4>
                                 <p>{task.description}</p>
                                 <p className="timestamp">
-                                    🕒 {new Date(task.createdAt).toLocaleString('en-IN', {
+                                    🗓️ Scheduled: {task.scheduledAt ? new Date(task.scheduledAt).toLocaleString('en-IN', {
                                     weekday: 'short', year: 'numeric', month: 'short',
                                     day: 'numeric', hour: '2-digit', minute: '2-digit',
-                                })}
+                                }) : 'Not scheduled'}
                                 </p>
                                 <button onClick={() => toggleComments(task.id)}>
                                     {expandedTasks[task.id] ? 'Hide Comments' : 'Show Comments'}
