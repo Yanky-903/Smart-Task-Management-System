@@ -117,4 +117,53 @@ textarea {
 .add-comment button:hover {
     background-color: #0056b3;
 }
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.nav-links button {
+    margin-left: 12px;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    background-color: white;
+    color: #007bff;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.nav-links button:hover {
+    background-color: #e0e0e0;
+}
+
+.google-fetch-section {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+/* Active view button */
+.nav-links .active {
+    background-color: #0056b3;
+    color: white;
+}
+
+/* Logout button (distinct style) */
+.nav-links .logout {
+    background-color: #dc3545;
+    color: white;
+}
+
+.nav-links .logout:hover {
+    background-color: #b02a37;
+}
+
 

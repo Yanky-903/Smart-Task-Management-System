@@ -14,6 +14,7 @@ function TaskManager() {
     const [expandedTasks, setExpandedTasks] = useState({});
     const [editingCommentId, setEditingCommentId] = useState(null);
     const [editedCommentContent, setEditedCommentContent] = useState('');
+    const [activeView, setActiveView] = useState('create-task');
 
     useEffect(() => {
         const savedUserId = localStorage.getItem('userId');
@@ -23,8 +24,10 @@ function TaskManager() {
     }, []);
 
     useEffect(() => {
-        if (userId) fetchTasks();
-    }, [userId]);
+        if (userId && activeView === 'show-tasks') {
+            fetchTasks();
+        }
+    }, [userId, activeView]);
 
     const fetchTasks = async () => {
         setLoading(true);
@@ -116,7 +119,7 @@ function TaskManager() {
             alert("Task added successfully!");
             setTitle('');
             setDescription('');
-            fetchTasks();
+            setActiveView('show-tasks');
         } catch (err) {
             console.error("Failed to add task:", err);
             alert("Failed to add task");
@@ -133,102 +136,141 @@ function TaskManager() {
                 params: { accessToken, userId }
             });
             alert("Fetched tasks from Google Calendar!");
-            fetchTasks();
+            setActiveView('show-tasks');
         } catch (err) {
             console.error("Failed to fetch from Google Calendar:", err);
             alert("Failed to fetch from Google Calendar");
         }
     };
 
+    const handleLogout = () => {
+        localStorage.clear();
+        window.location.href = '/';
+    };
+
     return (
         <div className="task-container">
-            <div className="task-form">
-                <h2>Create Task</h2>
-                <form onSubmit={handleAddTask}>
-                    <input type="text" placeholder="Task Title" value={title} onChange={(e) => setTitle(e.target.value)} required />
-                    <input type="text" placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} required />
-                    <input type="text" placeholder="User ID" value={userId} disabled />
-                    <button type="submit" disabled={loading}>Add Task</button>
-                </form>
 
-                <div style={{ marginTop: '20px' }}>
-                    <h3>Google Calendar Sync</h3>
-                    <input type="text" placeholder="Access Token" value={accessToken} disabled />
-                    <button onClick={handleFetchFromGoogleCalendar} disabled={loading}>Fetch from Google Calendar</button>
+            {/* Navigation Bar */}
+            <div className="navbar">
+                <h2 className="logo">Smart Task Manager</h2>
+                <div className="nav-links">
+                    <button
+                        className={activeView === 'create-task' ? 'nav-btn active' : 'nav-btn'}
+                        onClick={() => setActiveView('create-task')}
+                    >
+                        Create Task
+                    </button>
+                    <button
+                        className={activeView === 'show-tasks' ? 'nav-btn active' : 'nav-btn'}
+                        onClick={() => {
+                            setActiveView('show-tasks');
+                            fetchTasks();
+                        }}
+                    >
+                        Show Tasks
+                    </button>
+                    <button
+                        className={activeView === 'google-calendar' ? 'nav-btn active' : 'nav-btn'}
+                        onClick={() => {
+                            setActiveView('google-calendar');
+                            handleFetchFromGoogleCalendar();
+                        }}
+                    >
+                        Fetch from Google
+                    </button>
+                    <button className="nav-btn logout" onClick={handleLogout}>
+                        Logout
+                    </button>
                 </div>
             </div>
 
-            <div className="task-list">
-                <h3>Tasks</h3>
-                {loading ? (
-                    <p>Loading tasks...</p>
-                ) : tasks.length === 0 ? (
-                    <p>No tasks found.</p>
-                ) : (
-                    tasks.map((task) => (
-                        <div key={task.id} className="task-card">
-                            <h4>{task.title}</h4>
-                            <p>{task.description}</p>
-                            <p className="timestamp">
-                                🕒 {new Date(task.createdAt).toLocaleString('en-IN', {
-                                weekday: 'short', year: 'numeric', month: 'short',
-                                day: 'numeric', hour: '2-digit', minute: '2-digit',
-                            })}
-                            </p>
-                            <button onClick={() => toggleComments(task.id)}>
-                                {expandedTasks[task.id] ? 'Hide Comments' : 'Show Comments'}
-                            </button>
+            {/* Create Task View */}
+            {activeView === 'create-task' && (
+                <div className="task-form">
+                    <h2>Create Task</h2>
+                    <form onSubmit={handleAddTask}>
+                        <input type="text" placeholder="Task Title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+                        <input type="text" placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} required />
+                        {/* <input type="text" placeholder="User ID" value={userId} disabled /> */}
+                        <button type="submit" disabled={loading}>Add Task</button>
+                    </form>
+                </div>
+            )}
 
-                            {expandedTasks[task.id] && (
-                                <div className="comments-section">
-                                    <div className="comments-list">
-                                        {commentsMap[task.id]?.length ? (
-                                            commentsMap[task.id].map((comment) => (
-                                                <div key={comment.id} className="comment-item">
-                                                    {editingCommentId === comment.id ? (
-                                                        <>
-            <textarea
-                value={editedCommentContent}
-                onChange={(e) => setEditedCommentContent(e.target.value)}
-                placeholder="Edit your comment..."
-            />
-                                                            <div className="comment-actions">
-                                                                <button onClick={() => handleUpdateComment(comment, task.id)}>Save</button>
-                                                                <button onClick={cancelEditing}>Cancel</button>
-                                                            </div>
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <p>{comment.content}</p>
-                                                            <p className="timestamp">🗓️ {new Date(comment.createdAt).toLocaleString()}</p>
-                                                            <div className="comment-actions">
-                                                                <button onClick={() => startEditing(comment)}>Edit</button>
-                                                                <button onClick={() => handleDeleteComment(comment.id, task.id)}>Delete</button>
-                                                            </div>
-                                                        </>
-                                                    )}
-                                                </div>
+            {/* Show Tasks View */}
+            {activeView === 'show-tasks' && (
+                <div className="task-list">
+                    <h3>Tasks</h3>
+                    {loading ? (
+                        <p>Loading tasks...</p>
+                    ) : tasks.length === 0 ? (
+                        <p>No tasks found.</p>
+                    ) : (
+                        tasks.map((task) => (
+                            <div key={task.id} className="task-card">
+                                <h4>{task.title}</h4>
+                                <p>{task.description}</p>
+                                <p className="timestamp">
+                                    🕒 {new Date(task.createdAt).toLocaleString('en-IN', {
+                                    weekday: 'short', year: 'numeric', month: 'short',
+                                    day: 'numeric', hour: '2-digit', minute: '2-digit',
+                                })}
+                                </p>
+                                <button onClick={() => toggleComments(task.id)}>
+                                    {expandedTasks[task.id] ? 'Hide Comments' : 'Show Comments'}
+                                </button>
 
-                                            ))
-                                        ) : (
-                                            <p>No comments yet.</p>
-                                        )}
+                                {expandedTasks[task.id] && (
+                                    <div className="comments-section">
+                                        <div className="comments-list">
+                                            {commentsMap[task.id]?.length ? (
+                                                commentsMap[task.id].map((comment) => (
+                                                    <div key={comment.id} className="comment-item">
+                                                        {editingCommentId === comment.id ? (
+                                                            <>
+                                                                <textarea
+                                                                    value={editedCommentContent}
+                                                                    onChange={(e) => setEditedCommentContent(e.target.value)}
+                                                                    placeholder="Edit your comment..."
+                                                                />
+                                                                <div className="comment-actions">
+                                                                    <button onClick={() => handleUpdateComment(comment, task.id)}>Save</button>
+                                                                    <button onClick={cancelEditing}>Cancel</button>
+                                                                </div>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <p>{comment.content}</p>
+                                                                <p className="timestamp">🗓️ {new Date(comment.createdAt).toLocaleString()}</p>
+                                                                <div className="comment-actions">
+                                                                    <button onClick={() => startEditing(comment)}>Edit</button>
+                                                                    <button onClick={() => handleDeleteComment(comment.id, task.id)}>Delete</button>
+                                                                </div>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <p>No comments yet.</p>
+                                            )}
+                                        </div>
+                                        <div className="add-comment">
+                                            <input
+                                                type="text"
+                                                placeholder="Write a comment..."
+                                                value={commentText}
+                                                onChange={(e) => setCommentText(e.target.value)}
+                                            />
+                                            <button onClick={() => handleAddComment(task.id)}>Post</button>
+                                        </div>
                                     </div>
-                                    <div className="add-comment">
-                                        <input
-                                            type="text"
-                                            placeholder="Write a comment..."
-                                            value={commentText}
-                                            onChange={(e) => setCommentText(e.target.value)}
-                                        />
-                                        <button onClick={() => handleAddComment(task.id)}>Post</button>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    ))
-                )}
-            </div>
+                                )}
+                            </div>
+                        ))
+                    )}
+                </div>
+            )}
         </div>
     );
 }
